@@ -7,6 +7,14 @@ packages = [{ include = "vpn", from = "src" }]
 
 [tool.poetry.dependencies]
 python = ">=3.11"
+fastapi = "^0.128.0"
+uvicorn = {extras = ["standard"], version = "^0.40.0"}
+sqlalchemy = "^2.0.46"
+asyncpg = "^0.31.0"
+alembic = "^1.18.1"
+pydantic-settings = "^2.12.0"
+python-dotenv = "^1.2.1"
+cryptography = "^46.0.3"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0"
