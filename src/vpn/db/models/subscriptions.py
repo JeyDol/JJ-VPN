@@ -4,7 +4,7 @@ from sqlalchemy.orm import mapped_column, Mapped, relationship
 from src.vpn.db.base import Base
 
 
-class Subscriptions(Base):
+class SubscriptionsOrm(Base):
     __tablename__ = "subscriptions"
 
     id: Mapped[int] = mapped_column(primary_key=True)
