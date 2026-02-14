@@ -12,5 +12,5 @@ class IPPoolsOrm(Base):
     peer_id: Mapped[int] = mapped_column(ForeignKey("peers.id", ondelete="SET NULL"), nullable=True)
     allocated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), nullable=True)
 
-    peer = relationship("Peer", back_populates="ip_pools")
+    peer = relationship("PeersOrm", back_populates="ip_pool")
 

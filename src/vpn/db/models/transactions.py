@@ -24,6 +24,6 @@ class TransactionsOrm(Base):
     external_id: Mapped[str] = mapped_column(String(255), nullable=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
-    user = relationship("User", back_populates="transactions")
-    peer = relationship("Peer")
+    user = relationship("UsersOrm", back_populates="transactions")
+    peer = relationship("PeersOrm")
 

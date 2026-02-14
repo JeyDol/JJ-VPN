@@ -1,4 +1,6 @@
-from sqlalchemy import BigInteger, String, Boolean, DateTime, func
+from decimal import Decimal
+
+from sqlalchemy import BigInteger, String, Boolean, DateTime, func, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from src.vpn.db.base import Base
@@ -10,11 +12,12 @@ class UsersOrm(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
     telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, index=True)
     email: Mapped[str] = mapped_column(String(255), nullable=True)
+    balance: Mapped[Decimal] = mapped_column(Numeric(10,2), default=0.00, server_default="0.00")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
     updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
-    subscription_expires_at: Mapped[DateTime] = mapped_column(DateTime, nullable=True)
 
-    peers = relationship("Peer", back_populates="user", cascade="all, delete-orphan")
+    peers = relationship("PeersOrm", back_populates="user", cascade="all, delete-orphan")
+    transactions = relationship("TransactionsOrm", back_populates="user")
 
 
