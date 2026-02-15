@@ -1,4 +1,4 @@
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from typing import List
 
 from sqlalchemy import select, func, or_
@@ -6,6 +6,7 @@ from sqlalchemy import select, func, or_
 from src.vpn.core.exceptions import NotFoundException
 from src.vpn.db.models.peers import PeersOrm
 from src.vpn.repositories.base import BaseRepository
+from src.vpn.repositories.ip_pools import IPPoolRepository
 from src.vpn.repositories.mappers.base import DataMapper
 from src.vpn.repositories.mappers.mappers import PeersDataMapper
 from src.vpn.schemas.peers import PeerRead
@@ -76,3 +77,17 @@ class PeersRepository(BaseRepository):
         result = await self.session.execute(stmt)
         db_objs = result.scalars().all()
         return [self.mapper.map_to_domain_entity(obj) for obj in db_objs]
+
+    async def delete_old_inactive(self, days: int = 30) -> int:
+        cutoff_date = datetime.now() - timedelta(days=days)
+
+        stmt = select(self.model).where(self.model.is_active == False, self.model.revoked_at < cutoff_date)
+
+        result = await self.session.execute(stmt)
+        old_peers = result.scalars().all()
+
+        for peer in old_peers:
+            await self.session.delete(peer)
+
+        await self.session.commit()
+        return len(old_peers)
