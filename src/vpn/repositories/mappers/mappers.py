@@ -1,9 +1,11 @@
 from src.vpn.db.models.ip_pools import IPPoolsOrm
 from src.vpn.db.models.peers import PeersOrm
+from src.vpn.db.models.transactions import TransactionsOrm
 from src.vpn.db.models.users import UsersOrm
 from src.vpn.repositories.mappers.base import DataMapper
 from src.vpn.schemas.ip_pools import IPPoolRead, IPPoolCreate
 from src.vpn.schemas.peers import PeerRead, PeerCreate, PeerUpdate
+from src.vpn.schemas.transactions import TransactionRead, TransactionCreate
 from src.vpn.schemas.users import UserRead, UserCreate, UserUpdate
 
 
@@ -47,5 +49,15 @@ class IPPoolsDataMapper(DataMapper):
 
     @classmethod
     def from_create(cls, schema_obj: IPPoolCreate) -> IPPoolsOrm:
+        data = schema_obj.model_dump(exclude_unset=True, exclude_none=True)
+        return cls.db_model(**data)
+
+
+class TransactionsDataMapper(DataMapper):
+    db_model = TransactionsOrm
+    schema = TransactionRead
+
+    @classmethod
+    def from_create(cls, schema_obj: TransactionCreate) -> TransactionsOrm:
         data = schema_obj.model_dump(exclude_unset=True, exclude_none=True)
         return cls.db_model(**data)
