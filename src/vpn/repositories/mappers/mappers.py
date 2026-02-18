@@ -43,15 +43,6 @@ class PeersDataMapper(DataMapper):
         return db_obj
 
 
-class IPPoolsDataMapper(DataMapper):
-    db_model = IPPoolsOrm
-    schema = IPPoolRead
-
-    @classmethod
-    def from_create(cls, schema_obj: IPPoolCreate) -> IPPoolsOrm:
-        data = schema_obj.model_dump(exclude_unset=True, exclude_none=True)
-        return cls.db_model(**data)
-
 
 class TransactionsDataMapper(DataMapper):
     db_model = TransactionsOrm

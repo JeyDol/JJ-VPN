@@ -15,9 +15,5 @@ async def get_peer_repository(session: AsyncSession = Depends(get_session)) ->Pe
     return PeersRepository(session)
 
 
-async def get_ip_pool_repository(session: AsyncSession = Depends(get_session)) -> IPPoolRepository:
-    return IPPoolRepository(session)
-
-
 async def get_transaction_repository(session: AsyncSession = Depends(get_session)) -> TransactionsRepository:
     return TransactionsRepository(session)
