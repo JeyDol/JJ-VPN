@@ -67,7 +67,7 @@ class UsersService:
         return user
 
 
-    async def cat_create_peer(self, user_id: int, daily_cost: Decimal = Decimal("10.00"), max_peers: int = 5) -> dict:
+    async def can_create_peer(self, user_id: int, daily_cost: Decimal = Decimal("10.00"), max_peers: int = 5) -> dict:
         user = await self.user_repo.get_by_id(user_id)
         if user is None:
             raise NotFoundException("User", user_id)
