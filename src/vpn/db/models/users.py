@@ -15,7 +15,7 @@ class UsersOrm(Base):
     balance: Mapped[Decimal] = mapped_column(Numeric(10,2), default=0.00, server_default="0.00")
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
     created_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), server_default=func.now())
-    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), onupdate=func.now())
+    updated_at: Mapped[DateTime] = mapped_column(DateTime(timezone=True), nullable=True, onupdate=func.now())
 
     peers = relationship("PeersOrm", back_populates="user", cascade="all, delete-orphan")
     transactions = relationship("TransactionsOrm", back_populates="user")
