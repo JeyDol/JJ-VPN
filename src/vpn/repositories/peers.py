@@ -2,6 +2,7 @@ from datetime import datetime, date, timedelta
 from typing import List
 
 from sqlalchemy import select, func, or_
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.vpn.core.exceptions import NotFoundException
 from src.vpn.db.models.peers import PeersOrm
@@ -13,7 +14,9 @@ from src.vpn.schemas.peers import PeerRead
 
 class PeersRepository(BaseRepository):
     model = PeersOrm
-    mapper: DataMapper = PeersDataMapper
+
+    def __init__(self, session: AsyncSession):
+        super().__init__(session, PeersDataMapper)
 
 
     async def get_all_by_user_id(self, user_id: int) -> List[PeerRead]:

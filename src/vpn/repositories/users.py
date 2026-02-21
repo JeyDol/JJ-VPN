@@ -2,6 +2,7 @@ from decimal import Decimal
 from typing import List
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.vpn.core.exceptions import InvalidAmountException, NotFoundException, InsufficientBalanceException
 from src.vpn.db.models.users import UsersOrm
@@ -13,9 +14,9 @@ from src.vpn.schemas.users import UserRead
 
 class UsersRepository(BaseRepository):
     model = UsersOrm
-    mapper: DataMapper = UsersDataMapper
 
-
+    def __init__(self, session: AsyncSession):
+        super().__init__(session, UsersDataMapper)
 
 
     async def get_by_telegram_id(self, tg_id: int) -> UserRead | None:

@@ -1,6 +1,7 @@
 from typing import List
 
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.vpn.db.models.transactions import TransactionsOrm, TransactionType
 from src.vpn.repositories.base import BaseRepository
@@ -11,7 +12,9 @@ from src.vpn.schemas.transactions import TransactionRead
 
 class TransactionsRepository(BaseRepository):
     model = TransactionsOrm
-    mapper: DataMapper = TransactionsDataMapper
+
+    def __init__(self, session: AsyncSession):
+        super().__init__(session, TransactionsDataMapper)
 
 
     async def get_all_by_user_id(self, user_id: int) -> List[TransactionRead]:
