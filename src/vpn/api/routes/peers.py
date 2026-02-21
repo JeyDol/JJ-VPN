@@ -3,12 +3,15 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.vpn.core.exceptions import ValidationException, NotFoundException
-from src.vpn.db.dependencies import get_peers_service
+from src.vpn.db.dependencies import get_peers_service, get_peer_repository
+from src.vpn.repositories.peers import PeersRepository
 from src.vpn.schemas.peers import PeerRead
 from src.vpn.services.peers import PeersService
 
 router = APIRouter(prefix="/peers", tags=["Peers"])
 
+
+admin_router = APIRouter(prefix="/admin", tags=["Admin - Peers"])
 
 @router.post("/", response_model=PeerRead, status_code=201)
 async def create_peer(
@@ -80,3 +83,30 @@ async def delete_peer(
         raise HTTPException(status_code=404, detail=e.message)
     except ValidationException as e:
         raise HTTPException(status_code=403, detail=e.detail)
+
+
+@admin_router.get("/", response_model=PeerRead)
+async def get_all_peers(
+        peer_repo: PeersRepository = Depends(get_peer_repository)
+):
+    peers = await peer_repo.get_all()
+    return peers
+
+
+@admin_router.get("/active", response_model=List[PeerRead])
+async def get_all_active_peers(
+        peer_repo: PeersRepository = Depends(get_peer_repository)
+):
+    peers = await peer_repo.get_all_active()
+    return peers
+
+
+@admin_router.delete("/{peer_id}", status_code=204)
+async def force_delete_peer(
+        peer_id: int,
+        peer_repo: PeersRepository = Depends(get_peer_repository)
+):
+    deleted = await peer_repo.delete(peer_id)
+
+    if not deleted:
+        raise HTTPException(status_code=404, detail="Peer не найден")
