@@ -85,7 +85,7 @@ async def delete_peer(
         raise HTTPException(status_code=403, detail=e.detail)
 
 
-@admin_router.get("/", response_model=PeerRead)
+@admin_router.get("", response_model=PeerRead)
 async def get_all_peers(
         peer_repo: PeersRepository = Depends(get_peer_repository)
 ):
