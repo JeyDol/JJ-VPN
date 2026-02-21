@@ -14,7 +14,7 @@ from src.vpn.services.users import UsersService
 router = APIRouter(prefix="/users", tags=["Users"])
 
 
-admin_router = APIRouter(prefix="/admin/users", tags=["Admin - Users"])
+admin_router = APIRouter(prefix="/admin", tags=["Admin - Users"])
 
 @router.post("/auth", response_model=UserRead)
 async def auth_user(

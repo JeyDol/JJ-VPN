@@ -28,5 +28,7 @@ async def root():
 
 app.include_router(peers.router)
 app.include_router(users.router)
+app.include_router(peers.admin_router)
+app.include_router(users.admin_router)
 
 
