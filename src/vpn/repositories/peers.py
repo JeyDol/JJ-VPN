@@ -6,7 +6,6 @@ from sqlalchemy import select, func, or_
 from src.vpn.core.exceptions import NotFoundException
 from src.vpn.db.models.peers import PeersOrm
 from src.vpn.repositories.base import BaseRepository
-from src.vpn.repositories.ip_pools import IPPoolRepository
 from src.vpn.repositories.mappers.base import DataMapper
 from src.vpn.repositories.mappers.mappers import PeersDataMapper
 from src.vpn.schemas.peers import PeerRead
