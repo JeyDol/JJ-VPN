@@ -4,14 +4,17 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.vpn.core.exceptions import NotFoundException, InvalidAmountException
-from src.vpn.db.dependencies import get_user_service, get_transaction_repository
+from src.vpn.db.dependencies import get_user_service, get_transaction_repository, get_user_repository
 from src.vpn.repositories.transactions import TransactionsRepository
+from src.vpn.repositories.users import UsersRepository
 from src.vpn.schemas.transactions import TransactionRead
 from src.vpn.schemas.users import UserRead
 from src.vpn.services.users import UsersService
 
 router = APIRouter(prefix="/users", tags=["Users"])
 
+
+admin_router = APIRouter(prefix="/admin/users", tags=["Admin - Users"])
 
 @router.post("/auth", response_model=UserRead)
 async def auth_user(
@@ -73,3 +76,57 @@ async def can_create_peer(
 ):
     user = await user_service.can_create_peer(user_id)
     return user
+
+
+@admin_router.get("/", response_model=List[UserRead])
+async def get_all_users(
+        user_repo: UsersRepository = Depends(get_user_repository)
+):
+    users = await user_repo.get_all()
+    return users
+
+
+@admin_router.post("/{user_id}/ban", response_model=UserRead)
+async def ban_user(
+        user_id: int,
+        user_repo: UsersRepository = Depends(get_user_repository)
+):
+    try:
+        user = await user_repo.deactivate(user_id)
+        return user
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail=e.message)
+
+
+@admin_router.post("/{user_id}/unban", response_model=UserRead)
+async def unban_user(
+        user_id: int,
+        user_repo: UsersRepository = Depends(get_user_repository)
+):
+    try:
+        user = await user_repo.activate(user_id)
+        return user
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail=e.message)
+
+
+@admin_router.post("/{user_id}/balance/set", response_model=UserRead)
+async def set_user_balance(
+        user_id: int,
+        new_balance: Decimal,
+        user_repo: UsersRepository = Depends(get_user_repository)
+):
+    try:
+        user = await user_repo.update(user_id,{"balance": new_balance}) #type: ignore
+        return user
+    except NotFoundException as e:
+        raise HTTPException(status_code=404, detail=e.message)
+
+
+@admin_router.get("/low-balance", response_model=List[UserRead])
+async def get_users_with_low_balance(
+        threshold: Decimal = Decimal("20.00"),
+        user_repo: UsersRepository = Depends(get_user_repository)
+):
+    users = await user_repo.get_users_with_low_balance(threshold)
+    return users
