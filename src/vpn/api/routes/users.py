@@ -5,7 +5,7 @@ from fastapi import APIRouter, Depends, HTTPException
 
 from src.vpn.core.exceptions import NotFoundException, InvalidAmountException
 from src.vpn.core.security import create_access_token
-from src.vpn.db.dependencies import get_user_service, get_transaction_repository, get_user_repository
+from src.vpn.db.dependencies import get_user_service, get_transaction_repository, get_user_repository, get_current_user
 from src.vpn.repositories.transactions import TransactionsRepository
 from src.vpn.repositories.users import UsersRepository
 from src.vpn.schemas.transactions import TransactionRead
@@ -28,29 +28,20 @@ async def auth_user(
 
 @router.get("/me", response_model=UserRead)
 async def get_my_profile(
-        user_id: int,
-        user_service: UsersService = Depends(get_user_service)
+        current_user: UserRead = Depends(get_current_user),
 ):
-    try:
-        user: UserRead = await user_service.user_repo.get_by_id(user_id)
-
-        if user is None:
-            raise HTTPException(status_code=404, detail="Пользователь не найден")
-
-        return user
-    except NotFoundException as e:
-        raise HTTPException(status_code=404, detail=e.message)
+    return current_user
 
 
 @router.post("/balance/add", response_model=UserRead)
 async def add_balance(
-        user_id: int,
         amount: Decimal,
         payment_provider: str = "manual",
+        current_user: UserRead = Depends(get_current_user),
         user_service: UsersService = Depends(get_user_service)
 ):
     try:
-        user = await user_service.add_balance_with_transaction(user_id=user_id, amount=amount, payment_provider=payment_provider)
+        user = await user_service.add_balance_with_transaction(user_id=current_user.id, amount=amount, payment_provider=payment_provider)
         return user
     except InvalidAmountException as e:
         raise HTTPException(status_code=400, detail=e.detail)
@@ -60,23 +51,20 @@ async def add_balance(
 
 @router.get("/balance/history", response_model=List[TransactionRead])
 async def get_balance_history(
-        user_id: int,
+        current_user: UserRead = Depends(get_current_user),
         trans_repo: TransactionsRepository = Depends(get_transaction_repository)
 ):
-    try:
-        history = await trans_repo.get_all_by_user_id(user_id)
-        return history
-    except NotFoundException as e:
-        raise HTTPException(status_code=404, detail=e.message)
+    history = await trans_repo.get_all_by_user_id(current_user.id)
+    return history
 
 
 @router.get("/can-create-peer", response_model=dict)
 async def can_create_peer(
-        user_id: int,
+        current_user: UserRead = Depends(get_current_user),
         user_service: UsersService = Depends(get_user_service)
 ):
-    user = await user_service.can_create_peer(user_id)
-    return user
+    result = await user_service.can_create_peer(current_user.id)
+    return result
 
 
 @router.post("/auth/token")
