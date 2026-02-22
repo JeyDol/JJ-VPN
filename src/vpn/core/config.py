@@ -1,3 +1,4 @@
+from dulwich.midx import HASH_ALGORITHM_SHA256
 from pydantic_settings import BaseSettings
 
 
@@ -9,6 +10,14 @@ class Settings(BaseSettings):
     DB_NAME: str
 
     DATABASE_URL: str | None = None
+
+    SECRET_KEY: str
+    ALGORITHM: str
+    ACCESS_TOKEN_EXPIRE_MINUTES: int
+
+    REDIS_URL:str
+    DEBUG: bool = False
+
 
     def __init__(self, **values):
         super().__init__(**values)
