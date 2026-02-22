@@ -4,6 +4,7 @@ from typing import List
 from fastapi import APIRouter, Depends, HTTPException
 
 from src.vpn.core.exceptions import NotFoundException, InvalidAmountException
+from src.vpn.core.security import create_access_token
 from src.vpn.db.dependencies import get_user_service, get_transaction_repository, get_user_repository
 from src.vpn.repositories.transactions import TransactionsRepository
 from src.vpn.repositories.users import UsersRepository
@@ -78,6 +79,22 @@ async def can_create_peer(
     return user
 
 
+@router.post("/auth/token")
+async def get_auth_token(
+        telegram_id: int,
+        user_service: UsersService = Depends(get_user_service)
+):
+    user = await user_service.get_or_create_user(telegram_id)
+
+    access_token = create_access_token(data={"user_id": user.id})
+
+    return {
+        "access_token": access_token,
+        "token_type": "bearer",
+        "user": user
+    }
+
+
 @admin_router.get("/", response_model=List[UserRead])
 async def get_all_users(
         user_repo: UsersRepository = Depends(get_user_repository)
@@ -130,3 +147,5 @@ async def get_users_with_low_balance(
 ):
     users = await user_repo.get_users_with_low_balance(threshold)
     return users
+
+
