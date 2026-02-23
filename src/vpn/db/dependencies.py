@@ -1,6 +1,7 @@
-from fastapi import Depends, Header, HTTPException
+from fastapi import Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from src.vpn.core.security import verify_token
 from src.vpn.db.base import get_session
 from src.vpn.repositories.peers import PeersRepository
@@ -44,35 +45,44 @@ async def get_peers_service(
         user_serv=user_service
     )
 
+security = HTTPBearer()
 
 async def get_current_user(
-    authorization: str | None = Header(None),
-    user_repo: UsersRepository = Depends(get_user_repository)
+        credentials: HTTPAuthorizationCredentials = Depends(security),
+        user_repo: UsersRepository = Depends(get_user_repository)
 ) -> UserRead:
-    if not authorization:
-        raise HTTPException(status_code=401, detail="Токен авторизации отсутствует", headers={"WWW-Authenticate": "Bearer"})
 
-    parts = authorization.split()
-    if len(parts) != 2 or parts[0].lower() != "bearer":
-        raise HTTPException(status_code=401, detail="Неверный формат токена", headers={"WWW-Authenticate": "Bearer"})
-
-    token = parts[1]
+    token = credentials.credentials
 
     payload = verify_token(token)
     if payload is None:
-        raise HTTPException(status_code=401, detail="Токен невалидный или истёк", headers={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(
+            status_code=401,
+            detail="Токен невалидный или истёк",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
+    # Извлекаем user_id
     user_id = payload.get("user_id")
     if user_id is None:
-        raise HTTPException(status_code=401, detail="Некорректный токен", headers={"WWW-Authenticate": "Bearer"})
+        raise HTTPException(
+            status_code=401,
+            detail="Некорректный токен",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
 
-    user = await user_repo.get_by_id(user_id)
+    user: UserRead = await user_repo.get_by_id(user_id)  # type: ignore
 
     if user is None:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        raise HTTPException(
+            status_code=401,
+            detail="Пользователь не найден"
+        )
 
     if not user.is_active:
-        raise HTTPException(status_code=403, detail="Аккаунт деактивирован")
+        raise HTTPException(
+            status_code=401,
+            detail="Аккаунт деактивирован"
+        )
 
     return user
-
