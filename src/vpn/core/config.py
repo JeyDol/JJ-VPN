@@ -1,4 +1,5 @@
 from dulwich.midx import HASH_ALGORITHM_SHA256
+from pydantic import Field
 from pydantic_settings import BaseSettings
 
 
@@ -18,6 +19,12 @@ class Settings(BaseSettings):
     REDIS_URL:str
     DEBUG: bool = False
 
+    XRAY_SERVER_ADDRESS: str = Field(..., env="XRAY_SERVER_ADDRESS")
+    XRAY_SERVER_PORT: int = Field(default=443, env="XRAY_SERVER_PORT")
+    XRAY_PUBLIC_KEY: str = Field(..., env="XRAY_PUBLIC_KEY")
+    XRAY_SHORT_ID: str = Field(..., env="XRAY_SHORT_ID")
+    XRAY_SNI: str = Field(default="www.google.com", env="XRAY_SNI")
+    XRAY_FINGERPRINT: str = Field(default="chrome", env="XRAY_FINGERPRINT")
 
     def __init__(self, **values):
         super().__init__(**values)
