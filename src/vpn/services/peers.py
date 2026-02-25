@@ -47,9 +47,9 @@ class PeersService:
             device_name=peer.device_name,
             server_address=server_address,
             server_port=server_port,
-            public_key="",
-            short_id="",
-            sni=""
+            public_key="aFnq58nHO19XwuMym6rTMxSU_k-8NBTBeP0PbPuKTlI",
+            short_id="5dab711cddd2dbca",
+            sni="www.google.com"
         )
 
         return config
