@@ -3,7 +3,10 @@ name = "vpn"
 version = "0.1.0"
 description = "VPN backend"
 authors = ["exl <levzavadskiy999@gmail.com>"]
-packages = [{ include = "vpn", from = "src" }]
+packages = [
+    { include = "vpn", from = "src" },
+    { include = "bot" },
+]
 
 [tool.poetry.dependencies]
 python = ">=3.11"
@@ -23,6 +26,8 @@ redis = "^7.2.0"
 python-jose = {extras = ["cryptography"], version = "^3.5.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
 python-multipart = "^0.0.22"
+aiogram = ">=3.16.0,<4.0.0"
+aiohttp = ">=3.11.0,<4.0.0"
 
 [tool.poetry.group.dev.dependencies]
 black = "^24.0"
