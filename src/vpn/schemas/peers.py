@@ -1,6 +1,7 @@
 
 from datetime import date, datetime
 from decimal import Decimal
+import urllib.parse
 
 from pydantic import BaseModel, Field, ConfigDict
 
@@ -45,21 +46,24 @@ class VLESSConfig(BaseModel):
     public_key: str
     short_id: str
     sni: str
+    fingerprint: str = "chrome"
 
     def to_vless_link(self) -> str:
+        encoded_name = urllib.parse.quote(self.device_name)
+
         return (
             f"vless://{self.uuid}@{self.server_address}:{self.server_port}"
-            f"?security=reality"
+            f"?encryption=none"
+            f"&flow=xtls-rprx-vision"
+            f"&security=reality"
             f"&sni={self.sni}"
-            f"&fp=chrome"
+            f"&fp={self.fingerprint}"
             f"&pbk={self.public_key}"
             f"&sid={self.short_id}"
             f"&type=tcp"
-            f"&flow=xtls-rprx-vision"
-            f"#{self.device_name}"
+            f"&headerType=none"
+            f"#{encoded_name}"
         )
-
-    model_config = {"from_attributes": True}
 
 
 class PeerStats(BaseModel):
