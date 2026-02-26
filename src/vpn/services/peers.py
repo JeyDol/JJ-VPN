@@ -1,5 +1,6 @@
 from typing import List
 
+from src.vpn.core.config import settings
 from src.vpn.core.exceptions import ValidationException, NotFoundException
 from src.vpn.repositories.peers import PeersRepository
 from src.vpn.schemas.peers import PeerRead, PeerCreate, VLESSConfig
@@ -45,11 +46,12 @@ class PeersService:
             peer_id=peer.id,
             uuid=peer.uuid,
             device_name=peer.device_name,
-            server_address=server_address,
-            server_port=server_port,
-            public_key="aFnq58nHO19XwuMym6rTMxSU_k-8NBTBeP0PbPuKTlI",
-            short_id="5dab711cddd2dbca",
-            sni="www.google.com"
+            server_address=settings.XRAY_SERVER_ADDRESS,
+            server_port=settings.XRAY_SERVER_PORT,
+            public_key=settings.XRAY_PUBLIC_KEY,
+            short_id=settings.XRAY_SHORT_ID,
+            sni=settings.XRAY_SNI,
+            fingerprint=settings.XRAY_FINGERPRINT
         )
 
         return config
