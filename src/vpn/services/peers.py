@@ -1,4 +1,6 @@
 from typing import List
+import subprocess
+from pathlib import Path
 
 from src.vpn.core.config import settings
 from src.vpn.core.exceptions import ValidationException, NotFoundException
@@ -30,13 +32,31 @@ class PeersService:
             )
         )  # type: ignore
 
-        return peer     # type: ignore
+        try:
+            self._add_user_to_xray(client_uuid, f"user-{user_id}")
+        except Exception as e:
+            await self.peer_repo.delete(peer.id)
+            raise ValidationException(
+                "xray_error",
+                f"Ошибка добавления в Xray: {str(e)}"
+            )
+
+        return peer #type: ignore
 
 
-    async def get_peer_config(self, peer_id: int, server_address: str = "", server_port: int = 443, use_fallback: bool = False) -> VLESSConfig:
-        if use_fallback:
-            server_port = 2053
+    def _add_user_to_xray(self, uuid: str, email: str):
+        script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "manage_xray.py"
 
+        result = subprocess.run(
+            ["python3", str(script_path), "add", uuid, email],
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode != 0:
+            raise Exception(f"Ошибка Xray: {result.stderr}")
+
+    async def get_peer_config(self, peer_id: int) -> VLESSConfig:
         peer = await self.peer_repo.get_by_id(peer_id)
 
         if peer is None:
@@ -79,6 +99,25 @@ class PeersService:
                 f"Peer {peer_id} не принадлежит пользователю {user_id}"
             )
 
+        try:
+            self._remove_user_from_xray(peer.uuid)
+        except Exception as e:
+            print(f"Предупреждение: не удалось удалить из Xray: {e}")
+
         deleted = await self.peer_repo.delete(peer_id)
         return deleted
+
+
+    def _remove_user_from_xray(self, uuid: str):
+        script_path = Path(__file__).parent.parent.parent.parent / "scripts" / "manage_xray.py"
+
+        result = subprocess.run(
+            ["python3", str(script_path), "remove", uuid],
+            capture_output=True,
+            text=True
+        )
+
+        if result.returncode != 0:
+            raise Exception(f"Ошибка Xray: {result.stderr}")
+
 
