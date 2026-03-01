@@ -26,6 +26,9 @@ class Settings(BaseSettings):
     XRAY_SNI: str = Field(default="www.google.com", env="XRAY_SNI")
     XRAY_FINGERPRINT: str = Field(default="chrome", env="XRAY_FINGERPRINT")
 
+    CLOUDPAYMENTS_PUBLIC_ID: str
+    CLOUDPAYMENTS_API_KEY: str
+
     def __init__(self, **values):
         super().__init__(**values)
         self.DATABASE_URL = (
